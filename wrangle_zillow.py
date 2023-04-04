@@ -35,8 +35,8 @@ def prepare(df):
     df = df.dropna()
     cols_name = ['bedrooms', 'bathrooms', 'calculated_finished_squarefeet',
            'tax_valuedollar_cnt', 'year_built', 'tax_amount', 'fips']
-
     df.set_axis(cols_name, axis=1,inplace=True)
+    remove_outliers(df)
     return df
 
 def split_data(df):
@@ -51,3 +51,23 @@ def quantile_scaler(train):
     train_scaled = q_scaler.transform(train)
     validate_scaled = q_scaler.transform(validate)
     test_scaled = q_scaler.transform(test)
+    
+    
+
+def remove_outliers(df):
+    
+    col_list = list(df.columns)
+    for col in col_list:
+
+        q1, q3 = df[col].quantile([.25, .75])  # get quartiles
+
+        iqr = q3 - q1   # calculate interquartile range
+
+        upper_bound = q3 + 1.5 * iqr   # get upper bound
+        lower_bound = q1 - 1.5 * iqr   # get lower bound
+
+        # return dataframe without outliers
+
+        df = df[(df[col] > lower_bound) & (df[col] < upper_bound)]
+
+    return df
